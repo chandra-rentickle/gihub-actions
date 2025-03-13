@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+  gc:
+    driver: bridge
+
+services:
+  api-server:
+    build: ./api-server
+    container_name: api-server
+    ports:
+      - 8000:8000
+    networks:
+      - gc
+    volumes:
+      - ${HOME}/github-test-server/gihub-actions/api-server/logs:/home/app/logs
+      - ${HOME}/github-test-server/gihub-actions/api-server/uploads:/home/app/uploads
+    restart: unless-stopped
+    command: ["sh", "run.sh"]

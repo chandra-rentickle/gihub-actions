@@ -1,0 +1,55 @@
+name: API Server Pipeline
+
+defaults:
+  run:
+    shell: bash
+    working-directory: api-server  
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup-context:
+    name: Setup Context for Server
+    uses: ./.github/workflows/service-context.yml
+    with:
+      service_name: "api-server"
+      service_dir: "api-server"
+      node_version: "20.18.0"
+
+  test-and-lint:
+    name: Lint And Test Server
+    needs: setup-context
+    uses: ./.github/workflows/test-and-lint.yml
+    with:
+      service_name: ${{ needs.setup-context.outputs.service_name }}
+      service_dir: ${{ needs.setup-context.outputs.service_dir }}
+      node_version: ${{ needs.setup-context.outputs.node_version }}
+    secrets: inherit
+
+  build-push-docker-image:
+    name: Build and Push Docker Image for API Server
+    needs: [setup-context, test-and-lint]
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      service_name: ${{ needs.setup-context.outputs.service_name }}
+      service_dir: ${{ needs.setup-context.outputs.service_dir }}
+      commit_short: ${{ needs.setup-context.outputs.commit_short }}
+    secrets: inherit
+
+  deploy-dev:
+    if: github.base_ref == 'dev' 
+    name: Deploy API Server to Dev Environment
+    needs: [setup-context, build-push-docker-image]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      service_name: ${{ needs.setup-context.outputs.service_name }}
+      service_dir: ${{ needs.setup-context.outputs.service_dir }}
+      environment: "dev"
+      commit_short: ${{ needs.setup-context.outputs.commit_short }}
+      service_var_name: ${{ needs.setup-context.outputs.service_var_name }}
+      container_name: "api-server"
+    secrets: inherit
+

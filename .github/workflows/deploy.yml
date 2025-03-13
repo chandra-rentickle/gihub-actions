@@ -1,0 +1,69 @@
+name: Deploy Service
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      service_dir:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      commit_short:
+        required: true
+        type: string
+      service_var_name:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Upload CI - File to EC2
+        uses: appleboy/scp-action@v0.0.9
+        with:
+          host: ${{ inputs.environment == 'dev' && vars.DEPLOY_HOST_DEV || vars.DEPLOY_HOST_PROD }}
+          username: "ec2-user"
+          key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          source: "./docker-compose.ci.yml"
+          target: "${{ vars.DEPLOY_REMOTE_PATH }}"
+
+
+      - name: Upload deploy.sh to EC2
+        uses: appleboy/scp-action@v0.0.9
+        with:
+          host: ${{ inputs.environment == 'dev' && vars.DEPLOY_HOST_DEV || vars.DEPLOY_HOST_PROD }}
+          username: "ec2-user"
+          key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          source: "./deploy.sh"
+          target: "${{ vars.DEPLOY_REMOTE_PATH }}"
+
+          debug: true
+
+      - name: Deploy to ${{ inputs.environment }} Environment
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ inputs.environment == 'dev' && vars.DEPLOY_HOST_DEV || vars.DEPLOY_HOST_PROD }}
+          username: "${{ vars.SSH_USERNAME }}"
+          key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          script: | 
+            export DOCKER_AUTH_TOKEN="${{ secrets.DOCKER_AUTH_TOKEN }}"
+            export SERVICE_NAME="${{ inputs.service_name }}"
+            export COMMIT_SHORT="${{ inputs.commit_short }}"
+            export DEPLOY_REMOTE_PATH="${{ vars.DEPLOY_REMOTE_PATH }}"
+
+            # Execute deploy.sh for further setup
+            cd "${{ vars.DEPLOY_REMOTE_PATH }}"
+            chmod +x deploy.sh
+            ./deploy.sh

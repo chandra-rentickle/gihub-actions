@@ -1,0 +1,36 @@
+
+name: Setup Service Context
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      service_dir:
+        required: true
+        type: string
+      node_version:
+        required: true
+        type: string
+    outputs:
+      service_name:
+        value: ${{ inputs.service_name }}
+      service_dir:
+        value: ${{ inputs.service_dir }}
+      node_version:
+        value: ${{ inputs.node_version }}
+      commit_short:
+        value: ${{ github.sha }}
+
+run-name: "Service context ${{ inputs.service_name }}"       
+
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Context
+        run: |
+          echo "Service Name: ${{ inputs.service_name }}"
+          echo "Service Directory: ${{ inputs.service_dir }}"
+          echo "Node Version: ${{ inputs.node_version }}"

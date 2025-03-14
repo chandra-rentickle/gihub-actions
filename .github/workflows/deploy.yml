@@ -31,6 +31,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Debug SSH Key
+        run: echo "$SSH_PRIVATE_KEY" | base64 --decode
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+
       - name: Upload CI - File to EC2
         uses: appleboy/scp-action@v0.0.9
         with:
@@ -39,7 +44,7 @@ jobs:
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           source: "./docker-compose.ci.yml"
           target: "${{ vars.DEPLOY_REMOTE_PATH }}"
-
+          debug: true 
 
       - name: Upload deploy.sh to EC2
         uses: appleboy/scp-action@v0.0.9
@@ -49,7 +54,6 @@ jobs:
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           source: "./deploy.sh"
           target: "${{ vars.DEPLOY_REMOTE_PATH }}"
-
           debug: true
 
       - name: Deploy to ${{ inputs.environment }} Environment

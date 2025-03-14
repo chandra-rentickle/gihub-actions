@@ -35,7 +35,7 @@ jobs:
         uses: appleboy/scp-action@v0.0.9
         with:
           host: "${{ vars.DEPLOY_HOST_DEV  }}"
-          username: "ec2-user"
+          username: "ubuntu"
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           source: "./docker-compose.ci.yml"
           target: "${{ vars.DEPLOY_REMOTE_PATH }}"
@@ -45,7 +45,7 @@ jobs:
         uses: appleboy/scp-action@v0.0.9
         with:
           host: "${{ vars.DEPLOY_HOST_DEV  }}"
-          username: "ec2-user"
+          username: "ubuntu"
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           source: "./deploy.sh"
           target: "${{ vars.DEPLOY_REMOTE_PATH }}"

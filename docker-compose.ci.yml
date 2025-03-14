@@ -6,10 +6,7 @@ networks:
 
 services:
   api-server:
-    image: singhcsm/api-server
-    build:
-      context: ./api-server
-      dockerfile: Dockerfile
+    image: singhcsm/api-server:${COMMIT_SHORT}
     container_name: api-server
     ports:
       - 8000:8000

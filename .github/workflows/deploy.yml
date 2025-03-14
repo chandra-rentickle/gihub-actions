@@ -55,7 +55,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: "${{ vars.DEPLOY_HOST_DEV  }}"
-          username: "${{ vars.SSH_USERNAME }}"
+          username: "ubuntu"
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           script: | 
             export DOCKER_AUTH_TOKEN="${{ secrets.DOCKER_AUTH_TOKEN }}"

@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log in to DockerHub
-        run: echo "${{ secrets.DOCKER_AUTH_TOKEN }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_AUTH_TOKEN }}" | docker login -u "singhcsm" --password-stdin
 
       - name: Build and Push Docker Image
         working-directory: ${{ inputs.service_dir }}
